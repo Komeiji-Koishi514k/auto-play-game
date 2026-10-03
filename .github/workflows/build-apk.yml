@@ -61,6 +61,7 @@ jobs:
 
       - name: Build debug APK
         run: |
+          rm -rf ~/.buildozer
           SPEC=$(find "$GITHUB_WORKSPACE" -name buildozer.spec -type f | head -n 1)
           cd "$(dirname "$SPEC")"
           buildozer -v android debug
