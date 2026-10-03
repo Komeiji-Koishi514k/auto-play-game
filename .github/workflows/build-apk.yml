@@ -4,11 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "android_app/**"
-      - "android_src/**"
-      - "buildozer.spec"
-      - ".github/workflows/build-apk.yml"
-
+      - "**"
+      
 permissions:
   contents: read
 
@@ -19,6 +16,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Show repository files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Repository files:"
+          find . -maxdepth 3 -type f | sort
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,13 +43,32 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install buildozer==1.5.0 cython==0.29.36
 
+      - name: Find Buildozer project
+        run: |
+          SPEC=$(find "$GITHUB_WORKSPACE" -name buildozer.spec -type f | head -n 1)
+
+          if [ -z "$SPEC" ]; then
+            echo "ERROR: buildozer.spec was not found anywhere."
+            exit 1
+          fi
+
+          echo "Found buildozer.spec:"
+          echo "$SPEC"
+
+          cd "$(dirname "$SPEC")"
+          pwd
+          ls -la
+
       - name: Build debug APK
-        run: buildozer -v android debug
+        run: |
+          SPEC=$(find "$GITHUB_WORKSPACE" -name buildozer.spec -type f | head -n 1)
+          cd "$(dirname "$SPEC")"
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: auto-play-game-apk
-          path: bin/*.apk
+          path: "**/bin/*.apk"
           if-no-files-found: error
           retention-days: 14
