@@ -16,6 +16,7 @@ android.sdk = 35
 android.archs = arm64-v8a
 android.allow_backup = True
 android.entrypoint = org.kivy.android.PythonActivity
+android.accept_sdk_license = True
 
 [buildozer]
 warn_on_root = 1
